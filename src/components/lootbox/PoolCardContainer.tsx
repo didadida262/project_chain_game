@@ -4,7 +4,6 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 'use client';
-
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
@@ -17,49 +16,8 @@ import lootbox_card_lumens from '@/assets/images/lootbox/lootbox_card_lumens.png
 import lootbox_card_none from '@/assets/images/lootbox/lootbox_card_none.png';
 import lootbox_card_usdt from '@/assets/images/lootbox/lootbox_card_usdt.png';
 import treasureBox_btn_logo2 from '@/assets/images/lootbox/treasureBox_btn_logo2.png';
+import { mockData } from '@/mock/cardgame';
 
-const mockData = [
-  {
-    type: 'LUMENS',
-    amount: 6,
-  },
-  {
-    type: 'LUMENS',
-    amount: 6,
-  },
-  {
-    type: '',
-    amount: 36,
-  },
-  {
-    type: '',
-    amount: 35,
-  },
-  {
-    type: 'LUMENS',
-    amount: 6,
-  },
-  {
-    type: 'LUMENS',
-    amount: 6,
-  },
-  {
-    type: 'USDT',
-    amount: 25,
-  },
-  {
-    type: '',
-    amount: 50,
-  },
-  {
-    type: 'USDT',
-    amount: 22,
-  },
-  {
-    type: 'USDT',
-    amount: 40,
-  },
-];
 export default function PoolCardContainer() {
   const [flipped, setFlipped] = useState(false);
   const [CardsList, setCardsList] = useState([]) as any;
