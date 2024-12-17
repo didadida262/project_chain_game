@@ -1,3 +1,7 @@
+import lootbox_card_lumens from '@/assets/images/lootbox/lootbox_card_lumens.png';
+import lootbox_card_none from '@/assets/images/lootbox/lootbox_card_none.png';
+import lootbox_card_usdt from '@/assets/images/lootbox/lootbox_card_usdt.png';
+
 export const mockData = [
   {
     type: 'LUMENS',
@@ -40,3 +44,9 @@ export const mockData = [
     amount: 40,
   },
 ];
+
+export const PoolCardRewardImgMap = {
+  LUMENS: lootbox_card_lumens,
+  USDT: lootbox_card_usdt,
+  NONE: lootbox_card_none,
+};

@@ -5,22 +5,37 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 'use client';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Web3 } from 'web3';
 
 import { cn } from '@/lib/utils';
 
 import Button from '@/components/buttons/Button';
+import customToast from '@/components/customToast';
 
 import lootbox_card from '@/assets/images/lootbox/lootbox_card.png';
-import lootbox_card_lumens from '@/assets/images/lootbox/lootbox_card_lumens.png';
-import lootbox_card_none from '@/assets/images/lootbox/lootbox_card_none.png';
-import lootbox_card_usdt from '@/assets/images/lootbox/lootbox_card_usdt.png';
 import treasureBox_btn_logo2 from '@/assets/images/lootbox/treasureBox_btn_logo2.png';
-import { mockData } from '@/mock/cardgame';
+import { EIP6963ProviderDetail } from '@/Chain/Wallet/eip6963/EthereumProviderTypes';
+import { useEIP6963Wallets } from '@/Chain/Wallet/eip6963/useEIP6963Wallets';
+import { mockData, PoolCardRewardImgMap } from '@/mock/cardgame';
 
+// 目前只支持 metamask、trust、okx wallet
+export function getSupportedWalletRdns() {
+  return ['io.metamask', 'com.trustwallet.app', 'com.okex.wallet'];
+}
 export default function PoolCardContainer() {
   const [flipped, setFlipped] = useState(false);
   const [CardsList, setCardsList] = useState([]) as any;
+  const [currentProvider, setCurrentProvider] = useState() as any;
+  const { providers } = useEIP6963Wallets();
+
+  const evmSupportedWalletProviders = useMemo(
+    () =>
+      providers.filter((item: EIP6963ProviderDetail) =>
+        getSupportedWalletRdns().includes(item.info.rdns)
+      ),
+    [providers]
+  );
   const [tickets, settickets] = useState([
     {
       name: 'Sui Tickets',
@@ -34,13 +49,19 @@ export default function PoolCardContainer() {
     setFlipped(false);
   };
   const getImg = (type: any) => {
-    return type === 'LUMENS'
-      ? lootbox_card_lumens
-      : type === 'USDT'
-      ? lootbox_card_usdt
-      : lootbox_card_none;
+    if (!type) {
+      return PoolCardRewardImgMap['NONE'];
+    } else {
+      return PoolCardRewardImgMap[type as keyof typeof PoolCardRewardImgMap];
+    }
   };
   const handleMockData = () => {
+    console.log('currentProvider>>>', currentProvider);
+    if (!currentProvider) {
+      console.log('please login in wallet！');
+      return;
+    }
+    // 合约交互（付钱）
     const resultData = mockData.map((item: any) => {
       return {
         ...item,
@@ -61,35 +82,38 @@ export default function PoolCardContainer() {
       });
     setCardsList(CardsData);
   };
+  const handleConnect = async (wallet: EIP6963ProviderDetail) => {
+    const provider = new Web3(wallet.provider);
+    await provider.eth.requestAccounts();
+    setCurrentProvider(provider);
+    console.log('success!!!', provider);
+    customToast.success('连接成功');
+  };
 
   useEffect(() => {
     initCardList();
   }, []);
 
   return (
-    <div
-      className='relative  bg-cover bg-center bg-no-repeat pb-8 font-Oswald '
-      style={{}}
-    >
-      {tickets[0].count === 0 && (
-        <div className='absolute left-0 top-0 z-10 flex h-full w-full items-center justify-center bg-[#14131CB2]'>
-          <div className='flex h-[80px] w-[280px] items-center justify-center rounded-[12px] bg-[#FF7900]'>
-            <Image
-              src={treasureBox_btn_logo2}
-              alt=''
-              className='mr-[8px] aspect-[1] w-[40px]'
-            ></Image>
-            <span className='text-[26px] font-normal'>Get Tickets</span>
-          </div>
-        </div>
-      )}
-
+    <div className='relative  bg-cover bg-center bg-no-repeat pb-8 font-Oswald '>
       <div className='mx-auto  w-full xl:w-[1093px]  relative'>
         {/* 头部 */}
         <div className='relative mx-auto flex w-full  items-center justify-center h-[80px]'>
           <span className='font-Oswald text-[43px] font-semibold'>
             Just try it
           </span>
+        </div>
+        {/* 扫描到的所有钱包 */}
+        <div className='wallet'>
+          {evmSupportedWalletProviders.map((item) => (
+            <div key={item.info.rdns}>
+              <Button>
+                <span onClick={() => handleConnect(item)}>
+                  Connect {item.info.name}
+                </span>
+              </Button>
+            </div>
+          ))}
         </div>
         {/* 卡牌部分 */}
         <div
